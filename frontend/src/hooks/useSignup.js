@@ -22,7 +22,7 @@ const useSignup = () => {
     if (!success) {
       return;
     }
-
+    setLoading(true);
     try {
       const res = await fetch("/api/auth/signup", {
         method: "POST",
@@ -38,7 +38,8 @@ const useSignup = () => {
 
       const data = await res.json();
       if (data.error) {
-        throw new Error(data.error);
+        toast.error(data.error);
+        return;
       }
 
       // localstorage
@@ -72,7 +73,7 @@ function handleInputErros({
   }
 
   if (password.length < 6) {
-    toast.error("Password must be at least of 6 characters");
+    toast.error("Password must be at least 6 characters");
     return false;
   }
 
