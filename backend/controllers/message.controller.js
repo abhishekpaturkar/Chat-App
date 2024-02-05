@@ -2,7 +2,7 @@ import Conversation from "../models/conversation.model.js";
 import Message from "../models/message.model.js";
 
 export const sendMessage = async (req, res) => {
-  try {
+	try {
     const { message } = req.body;
     const { id: receiverId } = req.params;
     const senderId = req.user._id;
@@ -12,7 +12,7 @@ export const sendMessage = async (req, res) => {
     });
 
     if (!conversation) {
-      conversation = Conversation.create({
+      conversation = await Conversation.create({
         participants: [senderId, receiverId],
       });
     }
@@ -27,16 +27,18 @@ export const sendMessage = async (req, res) => {
       conversation.messages.push(newMessage._id);
     }
 
-    // Socket Remain
-
     // await conversation.save();
     // await newMessage.save();
+
+    // this will run in parallel
     await Promise.all([conversation.save(), newMessage.save()]);
+
+    // SOCKET IO FUNCTIONALITY WILL GO HERE
 
     res.status(201).json(newMessage);
   } catch (error) {
-    console.log("Error in sendMessage controller", error.message);
-    res.status(500).json({ error: "Internal Server Error" });
+    console.log("Error in sendMessage controller: ", error.message);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
